@@ -1,0 +1,19 @@
+{
+  "name": "water-rocket",
+  "version": "1.0.0",
+  "description": "Water rocket package set up",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodebotsau/water-rocket.git"
+  },
+  "author": "Andrew Fisher <ajfisher.td@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nodebotsau/water-rocket/issues"
+  },
+  "homepage": "https://github.com/nodebotsau/water-rocket#readme"
+}
