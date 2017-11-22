@@ -1,10 +1,12 @@
+from settings import *
+
 import machine
 pwr = machine.Pin(22, machine.Pin.OUT)
 pwr(0)
 
 import network
 network.WLAN().active(True)
-network.WLAN().connect('NotMyAP','NotMyPassword')
+network.WLAN().connect(WIFI_SSID, WIFI_PASSWORD)
 
 import struct
 name = ("%02x" * 6) % struct.unpack("6B", machine.unique_id())
@@ -12,11 +14,10 @@ name = ("%02x" * 6) % struct.unpack("6B", machine.unique_id())
 import time
 time.sleep(5)
 
-from umqtt.simple import MQTTClient
-mqtt = MQTTClient(name, "iot.eclipse.org")
+from lib.umqtt.simple import MQTTClient
+mqtt = MQTTClient(name, MQTT_HOST)
 mqtt.connect()
 
-import machine
 import time
 import struct
 import bmp280
@@ -35,7 +36,6 @@ while True:
     _, _, alt = bmp.read()
     t = time.ticks_ms()
     msg = '{"id": "%s", "t": %d, "acc": %f, "gyr": %f, "alt": %f}' % (name, t, acc, gyr, alt)
-    mqtt.publish("rocket_surgery", msg)
+    mqtt.publish(MQTT_TOPIC, msg)
     time.sleep(0.05)
-
 
