@@ -32,11 +32,11 @@ bmp = bmp280.BMP280(i2c)
 mpu = mpu9250.MPU9250(i2c)
 
 while True:
-    acc, gyr = mpu.read()
+    acc_z, gz = mpu.read()
     _, _, alt = bmp.read()
     t = time.ticks_ms()
     #msg = '{"id": "%s", "t": %d, "acc": %f, "gyr": %f, "alt": %f}' % (name, t, acc, gyr, alt)
-    msg = '{"id": "%s", "t": %d, "acc": %f, "alt": %f}' % (name, t, acc, alt)
+    msg = '{"id": "%s", "t": %d, "acc": %f, "gyr": %f, "alt": %f}' % (name, t, acc_z, gz, alt)
     mqtt.publish(MQTT_TOPIC, msg)
     time.sleep(0.05)
 

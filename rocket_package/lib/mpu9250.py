@@ -32,4 +32,5 @@ class MPU9250:
 
     def read(self):
         (ax, ay, az, _, gx, gy, gz) = struct.unpack(">7h", self.bus.readfrom_mem(104,0x3b,14))
-        return math.sqrt(ax*ax + ay*ay + az*az) / self.accel_scale, math.sqrt(gx*gx + gy*gy + gz*gz)
+        #return math.sqrt(ax*ax + ay*ay + az*az) / self.accel_scale, math.sqrt(gx*gx + gy*gy + gz*gz)
+        return az / self.accel_scale, gz
