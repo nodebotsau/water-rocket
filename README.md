@@ -16,3 +16,15 @@ Node + uPython Water Rockets with ESP32s and ground base telemetry system
     MQTT_HOST     = "iot.eclipse.org"
     MQTT_TOPIC    = "YOUR_NAME/rocket"
 ```
+
+## Operation
+
+```
+  cd water-rocket
+  node groundstation/tools/data_sim.js
+```
+
+```
+  cd water-rocket
+  node analysis/server.js
+```
