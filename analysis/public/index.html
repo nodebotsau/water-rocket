@@ -1,0 +1,160 @@
+<!doctype>
+<html>
+    <head>
+        <script src="/vendor/d3.min.js"></script>
+        <script src="/vendor/mqtt.js"></script>
+        <script src="/vendor/rickshaw/rickshaw.min.js"></script>
+
+        <link rel="stylesheet" href="/vendor/rickshaw/rickshaw.min.css" />
+		<style>
+			#chart_container {
+				position: relative;
+				font-family: Arial, Helvetica, sans-serif;
+                display: inline-block;
+			}
+			#chart {
+				position: relative;
+				left: 2rem;
+			}
+			#y_axis {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 2rem;
+			}
+			#y_axis2 {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+                left: calc(900px + 2rem);
+                width: 1rem;
+			}
+            #legend {
+                display: inline-block;
+                vertical-align: top;
+                margin: 0 0 0 2rem;
+            }
+		</style>
+    </head>
+    <body>
+
+		<div id="chart_container">
+            <div id="y_axis"></div>
+            <div id="chart"></div>
+            <div id="y_axis2"></div>
+        </div>
+        <div id="legend"></div>
+        <div id="slider"></div>
+
+        <script>
+
+            let series_data = [[], [], [] ];
+            let palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
+
+            let scale1 = d3.scale.linear().domain([0, 200]);
+            let scale2 = d3.scale.linear().domain([0, 10]);
+
+
+            let graph = new Rickshaw.Graph( {
+                    element: document.querySelector("#chart"),
+                    width: 900,
+                    height: 500,
+                    renderer: 'line',
+                    series: [ {
+                        name: 'acc',
+                        color: palette.color(),
+                        data: series_data[0],
+                        scale: scale1,
+                    },{
+                        name: 'gyr',
+                        color: palette.color(),
+                        data: series_data[1],
+                        scale: scale2,
+                    }, {
+                        name: 'alt',
+                        color: palette.color(),
+                        data: series_data[2],
+                        scale: scale1,
+                    }]
+            } );
+
+            let x_axis = new Rickshaw.Graph.Axis.Time({
+                graph: graph,
+                ticksTreatment: 'glow',
+                timeFixture: new Rickshaw.Fixtures.Time.Local(),
+                //tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+            });
+
+			let y_axis = new Rickshaw.Graph.Axis.Y.Scaled( {
+					graph: graph,
+					orientation: 'left',
+					tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+					element: document.getElementById('y_axis'),
+                    scale: scale1,
+			});
+
+			let y_axis_right = new Rickshaw.Graph.Axis.Y.Scaled({
+					graph: graph,
+					orientation: 'right',
+					tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+					element: document.getElementById('y_axis2'),
+                    scale: scale2,
+			});
+
+            let legend = new Rickshaw.Graph.Legend( {
+                element: document.querySelector('#legend'),
+                graph: graph
+            });
+            let shelving = new Rickshaw.Graph.Behavior.Series.Toggle({
+                graph: graph,
+                legend: legend
+            });
+            var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight({
+                graph: graph,
+                legend: legend
+            });
+
+            let hoverDetail = new Rickshaw.Graph.HoverDetail( {
+                graph: graph
+            });
+
+            /**let slider = new Rickshaw.Graph.RangeSlider({
+                graph: graph,
+                element: document.querySelector('#slider')
+            });**/
+
+            graph.render();
+
+            let number_pts = 0;
+            const MAX_PTS = 10;
+            let intv = null;
+            intv = window.setInterval(() => {
+                let time = new Date().getTime() / 1000;
+                console.log(time);
+                series_data[0].push({
+                    y: Math.random() * 99,
+                    x: time,
+                });
+
+                series_data[1].push({
+                    y: Math.random() * 3,
+                    x: time,
+                });
+
+                series_data[2].push({
+                    y: Math.random() * 200,
+                    x: time,
+                });
+
+                graph.update();
+
+                if (++number_pts > MAX_PTS) {
+                    window.clearInterval(intv);
+                }
+
+            }, 1000);
+
+        </script>
+
+    </body>
+</html>

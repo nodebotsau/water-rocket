@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/nodebotsau/water-rocket/issues"
   },
-  "homepage": "https://github.com/nodebotsau/water-rocket#readme"
+  "homepage": "https://github.com/nodebotsau/water-rocket#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "mosca": "^2.7.0",
+    "mqtt": "^2.14.0",
+    "rickshaw": "^1.6.3"
+  }
 }
