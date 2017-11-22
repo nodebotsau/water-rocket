@@ -4,8 +4,12 @@
         <script src="/vendor/d3.min.js"></script>
         <script src="/vendor/mqtt.js"></script>
         <script src="/vendor/rickshaw/rickshaw.min.js"></script>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/jquery-ui.min.js"></script>
 
         <link rel="stylesheet" href="/vendor/rickshaw/rickshaw.min.css" />
+        <link rel="stylesheet" href="/css/jquery-ui.min.css" />
+
 		<style>
 			#chart_container {
 				position: relative;
@@ -15,90 +19,120 @@
 			#chart {
 				position: relative;
 				left: 2rem;
+                top: 1rem;
 			}
-			#y_axis {
+			#y_axis_alt {
 				position: absolute;
 				top: 0;
 				bottom: 0;
 				width: 2rem;
 			}
-			#y_axis2 {
+			#y_axis_acc {
 				position: absolute;
 				top: 0;
 				bottom: 0;
-                left: calc(900px + 2rem);
+                left: calc(1000px + 2rem);
                 width: 1rem;
 			}
+			#y_axis_gyr {
+                display: none;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+                left: calc(1000px + 2rem + 2rem);
+                width: 2rem;
+			}
+
             #legend {
                 display: inline-block;
                 vertical-align: top;
-                margin: 0 0 0 2rem;
+                margin: 0 0 0 6rem;
             }
 		</style>
     </head>
     <body>
 
 		<div id="chart_container">
-            <div id="y_axis"></div>
+            <div id="y_axis_alt">Alt</div>
             <div id="chart"></div>
-            <div id="y_axis2"></div>
+            <div id="y_axis_acc">Acc</div>
+            <div id="y_axis_gyr">Gyr</div>
         </div>
         <div id="legend"></div>
         <div id="slider"></div>
 
         <script>
 
+            const ACC = 0;
+            const GYR = 1;
+            const ALT = 2;
+            const MAX_PTS = 1500;
+
+            let slider_init = false;
+
             let series_data = [[], [], [] ];
             let palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
 
-            let scale1 = d3.scale.linear().domain([0, 200]);
-            let scale2 = d3.scale.linear().domain([0, 10]);
-
+            let scale_acc = d3.scale.linear().domain([-2, 5]);
+            let scale_gyr = d3.scale.linear().domain([0, 2000]);
+            let scale_alt = d3.scale.linear().domain([30, 45]);
 
             let graph = new Rickshaw.Graph( {
                     element: document.querySelector("#chart"),
-                    width: 900,
+                    width: 1000,
                     height: 500,
                     renderer: 'line',
                     series: [ {
                         name: 'acc',
                         color: palette.color(),
-                        data: series_data[0],
-                        scale: scale1,
-                    },{
+                        data: series_data[ACC],
+                        scale: scale_acc,
+                    },
+                    /**{
                         name: 'gyr',
                         color: palette.color(),
-                        data: series_data[1],
-                        scale: scale2,
-                    }, {
+                        data: series_data[GYR],
+                        scale: scale_gyr,
+                    }, **/
+                    {
                         name: 'alt',
                         color: palette.color(),
-                        data: series_data[2],
-                        scale: scale1,
-                    }]
+                        data: series_data[ALT],
+                        scale: scale_alt,
+                    }],
             } );
 
             let x_axis = new Rickshaw.Graph.Axis.Time({
                 graph: graph,
                 ticksTreatment: 'glow',
-                timeFixture: new Rickshaw.Fixtures.Time.Local(),
-                //tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+                //timeFixture: new Rickshaw.Fixtures.Time.Local(),
+                tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
             });
 
-			let y_axis = new Rickshaw.Graph.Axis.Y.Scaled( {
+            x_axis.render();
+
+			let y_axis_alt = new Rickshaw.Graph.Axis.Y.Scaled( {
 					graph: graph,
 					orientation: 'left',
 					tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-					element: document.getElementById('y_axis'),
-                    scale: scale1,
+					element: document.getElementById('y_axis_alt'),
+                    scale: scale_alt,
 			});
 
-			let y_axis_right = new Rickshaw.Graph.Axis.Y.Scaled({
+			/**let y_axis_gyr = new Rickshaw.Graph.Axis.Y.Scaled({
 					graph: graph,
 					orientation: 'right',
 					tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-					element: document.getElementById('y_axis2'),
-                    scale: scale2,
+					element: document.getElementById('y_axis_gyr'),
+                    scale: scale_gyr,
+			});**/
+
+			let y_axis_acc = new Rickshaw.Graph.Axis.Y.Scaled({
+					graph: graph,
+					orientation: 'right',
+					tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+					element: document.getElementById('y_axis_acc'),
+                    scale: scale_acc,
 			});
 
             let legend = new Rickshaw.Graph.Legend( {
@@ -118,41 +152,63 @@
                 graph: graph
             });
 
-            /**let slider = new Rickshaw.Graph.RangeSlider({
-                graph: graph,
-                element: document.querySelector('#slider')
-            });**/
-
             graph.render();
 
-            let number_pts = 0;
-            const MAX_PTS = 10;
-            let intv = null;
-            intv = window.setInterval(() => {
-                let time = new Date().getTime() / 1000;
-                console.log(time);
-                series_data[0].push({
-                    y: Math.random() * 99,
-                    x: time,
+
+            let client = mqtt.connect("ws://iot.eclipse.org/ws");
+            client.subscribe("rocket_surgery/data");
+
+            client.on("connected", () => {
+                console.log("Connected");
+            });
+
+            client.on("message", (topic, payload) => {
+                let data = JSON.parse(payload.toString());
+                //console.log(topic, payload.toString());
+                series_data[ACC].push({
+                    y: data.acc,
+                    x: data.t,
                 });
 
-                series_data[1].push({
-                    y: Math.random() * 3,
-                    x: time,
-                });
+                if (series_data[ACC].length > MAX_PTS) {
+                    series_data[ACC].shift();
+                }
 
-                series_data[2].push({
-                    y: Math.random() * 200,
-                    x: time,
+                /**series_data[GYR].push({
+                    y: data.gyr,
+                    x: data.t,
+                });**/
+
+                series_data[ALT].push({
+                    y: data.alt,
+                    x: data.t,
                 });
+                if (series_data[ALT].length > MAX_PTS) {
+                    series_data[ALT].shift();
+                }
 
                 graph.update();
 
-                if (++number_pts > MAX_PTS) {
-                    window.clearInterval(intv);
+                // now add a slider
+                if (series_data[ALT].length > 10 && ! slider_init) {
+
+                    /**let slider = new Rickshaw.Graph.RangeSlider({
+                        graph: graph,
+                        element: document.querySelector('#slider')
+                    });**/
+
+                    /**var sliderXAxis = new Rickshaw.Graph.Axis.Time({
+                        graph: graph,
+                        timeFixture: new Rickshaw.Fixtures.Time.Local(),
+                        ticksTreatment: 'glow',
+                    });
+
+                    sliderXAxis.render();**/
+
+                    slider_init = true;
                 }
 
-            }, 1000);
+            });
 
         </script>
 

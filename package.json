@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/nodebotsau/water-rocket#readme",
   "dependencies": {
+    "dotenv": "^4.0.0",
     "express": "^4.16.2",
     "mosca": "^2.7.0",
     "mqtt": "^2.14.0",
