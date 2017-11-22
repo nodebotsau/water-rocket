@@ -36,7 +36,7 @@ while True:
     _, _, alt = bmp.read()
     t = time.ticks_ms()
     #msg = '{"id": "%s", "t": %d, "acc": %f, "gyr": %f, "alt": %f}' % (name, t, acc, gyr, alt)
-    msg = '{"id": "%s", "t": %d, "acc": %f, "gyr": %f, "alt": %f}' % (name, t, acc_z, gz, alt)
+    msg = '{"id": "%s", "t": %d, "acc": %f, "alt": %f}' % (name, t, acc_z, alt)
     mqtt.publish(MQTT_TOPIC, msg)
     time.sleep(0.05)
 
