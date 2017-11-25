@@ -1,6 +1,5 @@
-WIFI_SSID = "notMyWifi"
-WIFI_PASSWORD = "notMyPassword"
+WIFI_SSID     = "YOUR_WIFI_SSID"
+WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
-MQTT_HOST = "iot.eclipse.org"
-MQTT_TOPIC = "rocket_surgery"
-
+MQTT_HOST     = "iot.eclipse.org"
+MQTT_TOPIC    = "YOUR_NAME/rocket"
