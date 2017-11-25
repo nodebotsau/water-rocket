@@ -4,7 +4,9 @@
   "description": "Water rocket package set up",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "local_mqtt": "./node_modules/.bin/mosca -v --http-port 3001 --http-bundle",
+    "sim_local": "node groundstation/tools/data_sim.js --host localhost"
   },
   "repository": {
     "type": "git",
