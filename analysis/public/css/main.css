@@ -1,0 +1,182 @@
+body {
+    margin: 0; padding: 0;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 62.5%;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+}
+
+article {
+    width:100vw;
+}
+
+aside {
+    width: 100vw;
+}
+
+#chart_container {
+    position: relative;
+}
+#chart {
+    position: relative;
+    left: 1.25rem;
+    top: 1rem;
+    width: calc(100% - 2.5rem);
+    height: calc(50vh - 1rem - 2rem);
+}
+
+#y_axis_alt, #y_axis_acc {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.25rem;
+}
+
+#y_axis_acc {
+    right: 0;
+}
+
+#chart .title, #y_axis_alt .y_ticks text, #y_axis_acc .y_ticks text {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 0.6rem;
+}
+
+#legend.rickshaw_legend {
+    background: none;
+    color: #333;
+    width: 100%;
+    padding: 0;
+}
+
+#legend.rickshaw_legend ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 0;
+    margin-top: 1.5rem;
+}
+
+#legend.rickshaw_legend ul li {
+    display: inline-block;
+}
+
+#legend.rickshaw_legend ul li a.action {
+    opacity: 0.7;
+}
+
+#legend.rickshaw_legend ul li a.action:hover {
+    opacity: 0.9;
+}
+
+#config {
+}
+
+aside div, aside ul, aside input {
+    width: 100%;
+}
+
+div#telemetry {
+    height: 2rem;
+    background: green;
+}
+div#telemetry.disconnected {
+    background: grey;
+}
+div#telemetry.connected {
+    background: green;
+}
+div#telemetry.los {
+    background: red;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+}
+
+aside ul li {
+    padding: 0 0.5rem;
+}
+
+aside li input {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem;
+    height: 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-bottom: 1px solid lightgrey;
+    text-align: center;
+}
+
+div.actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-bottom: 1rem;
+}
+
+.actions button {
+    width: 30%;
+    height: 2rem;
+    font-size: 1.2rem;
+}
+
+.actions button#download {
+    width: calc(60% + 1rem);
+}
+
+button#reset {
+    display: none;
+}
+
+div#config.paused button#reset {
+    display: initial;
+}
+
+
+/** Media query specific overrides **/
+
+@media only screen and (min-width: 600px) {
+
+    main {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    article {
+        width:65vw;
+    }
+
+    aside {
+        width: 30vw;
+        padding: 0 1rem;
+    }
+    #chart {
+        height: calc(90vh - 1rem - 2rem);
+        width: calc(100% - 4rem);
+        left: 2rem;
+    }
+
+    #y_axis_alt, #y_axis_acc {
+        width: 2rem;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    #chart .title, #y_axis_alt .y_ticks text, #y_axis_acc .y_ticks text {
+        font-size: 0.9rem;
+    }
+
+    aside ul li {
+        padding: 0;
+    }
+
+    div.actions {
+    }
+    div.actions button {
+        font-size: 1rem;
+    }
+}

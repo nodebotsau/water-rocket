@@ -9,7 +9,6 @@ const STATES = {
     WAITING: 0,
     RUNNING: 1,
     PAUSED: 2,
-
 };
 
 function UI(options) {
@@ -23,6 +22,8 @@ function UI(options) {
         state: document.getElementById("state"),
         download: document.getElementById("download"),
         reset: document.getElementById("reset"),
+        config: document.getElementById("config"),
+        telemetry: document.getElementById("telemetry"),
     };
 
     this.STATES = STATES;
@@ -33,6 +34,8 @@ function UI(options) {
         host: null,
         topic: null,
     };
+
+    this.got_signal = false;
 
     this.reactor = opts.reactor;
 
@@ -78,14 +81,39 @@ UI.prototype.set_state = function(state) {
     if (state == "running") {
         this.state = STATES.RUNNING;
         this.c.state.textContent = "Pause";
+        this.c.config.classList.remove("paused", "waiting");
+        this.c.config.classList.add("running");
         //this.reactor.dispatchEvent('data_running');
     } else if (state == "pause") {
         this.state = STATES.PAUSED;
         this.c.state.textContent = "Resume";
+        this.c.config.classList.remove("running", "waiting");
+        this.c.config.classList.add("paused");
         //this.reactor.dispatchEvent('data_paused');
     } else if (state == "waiting") {
         this.state = STATES.WAITING;
         this.c.state.textContent = "Waiting";
         this.c.connect.textContent = "Connect";
+        this.c.config.classList.remove("running", "paused");
+        this.c.config.classList.add("waiting");
     }
 };
+
+UI.prototype.set_signal = function(state) {
+    // state is a bool that defines the current state of the signal
+    // from the telemetry side
+
+    this.got_signal = state;
+
+    if (this.state != STATES.WAITING) {
+        if (! this.got_signal) {
+            this.c.telemetry.classList.add("los");
+        } else {
+            this.c.telemetry.classList.remove("los");
+        }
+
+        this.c.telemetry.classList.remove("disconnected");
+    } else {
+        this.c.telemetry.classList.add("disconnected");
+    }
+}

@@ -1,6 +1,11 @@
 <!doctype>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Rocket Telemetry</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <script src="/vendor/d3.min.js"></script>
         <script src="/vendor/mqtt.js"></script>
         <script src="/vendor/rickshaw/rickshaw.min.js"></script>
@@ -12,95 +17,65 @@
 
         <link rel="stylesheet" href="/vendor/rickshaw/rickshaw.min.css" />
         <link rel="stylesheet" href="/css/jquery-ui.min.css" />
+        <link rel="stylesheet" href="/css/main.css" />
 
-		<style>
-            body {
-            }
-			#chart_container {
-				position: relative;
-				font-family: Arial, Helvetica, sans-serif;
-                display: inline-block;
-			}
-			#chart {
-				position: relative;
-				left: 2rem;
-                top: 1rem;
-			}
-			#y_axis_alt {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				width: 2rem;
-			}
-			#y_axis_acc {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-                left: calc(1000px + 2rem);
-                width: 2rem;
-			}
-			#y_axis_gyr {
-                display: none;
-				position: absolute;
-				top: 0;
-				bottom: 0;
-                left: calc(1000px + 2rem + 2rem);
-                width: 2rem;
-			}
-
-            #legend {
-                display: inline-block;
-                vertical-align: top;
-                margin: 0 0 0 6rem;
-            }
-            #config {
-                margin-top: 2rem;
-                font-size: 2rem;
-            }
-            .server div, .server button {
-                display: inline-block;
-            }
-            .server div {
-                width: 20rem;
-            }
-            .server div input {
-                width: 100%;
-            }
-
-
-		</style>
     </head>
     <body>
+        <main>
+            <article>
+                <div id="chart_container">
+                    <div id="y_axis_alt">Alt</div>
+                    <div id="chart"></div>
+                    <div id="y_axis_acc">Acc</div>
+                    <div id="legend"></div>
+                    <div id="slider"></div>
+                </div>
+            </article>
+            <aside>
+                <div id="config">
+                    <div class="server">
+                        <div id="telemetry" class="disconnected"></div>
+                        <ul>
+                            <li><input id="hostname" type="text" placeholder="MQTT Server eg iot.eclipse.org"/></li>
+                            <li><input id="topic" type="text" placeholder="myid/rocket_surgery"></li>
+                        </ul>
+                        <div class="actions">
+                            <button id="connect">Connect</button>
+                            <button id="state">Waiting</button>
+                            <button id="reset">Reset</button>
+                        </div>
+                        <div class="actions">
+                            <button id="download">Download data</button>
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div id="notes">
+                    <h1>Telemetry notes</h1>
+                    <p>Enter the address of the MQTT server you want to connect
+                    to, and then the topic you want to subscribe to get the data
+                    from.</p>
 
-		<div id="chart_container">
-            <div id="y_axis_alt">Alt</div>
-            <div id="chart"></div>
-            <div id="y_axis_acc">Acc</div>
-            <div id="y_axis_gyr">Gyr</div>
-        </div>
-        <div id="legend"></div>
-        <div id="slider"></div>
-
-        <div id="config">
-            <div class="server">
-                <div><input id="hostname" type="text" placeholder="MQTT Server eg iot.eclipse.org"/></div>
-                <div><input id="topic" type="text" placeholder="myid/rocket_surgery"></div>
-                <button id="connect">Connect</button>
-                <button id="state">Waiting</button>
-                <button id="reset">Reset</button>
-            </div>
-            <button id="download">Download data</button>
-        </div>
+                </div>
+                -->
+            </aside>
+        </main>
 
         <script>
+
+            const LOS_TIMEOUT = 5000;
+
             let reactor = new Reactor();
             reactor.registerEvent('connect');
             reactor.registerEvent('disconnect');
             reactor.registerEvent('data_reset');
+            reactor.registerEvent('los');
+            reactor.registerEvent('sig');
 
             let grapher = new Grapher();
             let ui = new UI({ reactor: reactor });
             let client = null;
+            let last_message = 0;
 
             reactor.addEventListener('connect', (e) => {
                 client = mqtt.connect("ws://" + ui.mqtt.host);
@@ -113,6 +88,8 @@
 
                 client.on("message", (topic, payload) => {
                     let data = JSON.parse(payload.toString());
+                    last_message = Date.now();
+
                     if (ui.state == ui.STATES.RUNNING) {
                         grapher.add_data(data);
                     }
@@ -122,13 +99,34 @@
             reactor.addEventListener('disconnect', () => {
                 client.end(null, () => {
                     ui.set_state('waiting');
+                    ui.set_signal(false);
                 });
             });
 
             reactor.addEventListener('data_reset', () => {
-                console.log('resetting');
                 grapher.reset();
             });
+
+            reactor.addEventListener('los', () => {
+                ui.set_signal(false);
+            });
+
+            reactor.addEventListener('sig', () => {
+                ui.set_signal(true);
+            });
+
+            window.setInterval(() => {
+                const curr_time = Date.now();
+
+                console.log("LOS check", last_message, curr_time);
+                if (last_message > 0) {
+                    if (curr_time - last_message > LOS_TIMEOUT) {
+                        reactor.dispatchEvent("los");
+                    } else {
+                        reactor.dispatchEvent("sig");
+                    }
+                }
+            }, 1000);
 
         </script>
 

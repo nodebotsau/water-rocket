@@ -21,10 +21,12 @@ function Grapher() {
     let scale_alt = d3.scale.linear().domain([-5, 120]);
     //let scale_gyr = d3.scale.linear().domain([0, 2000]);
 
+    let chart = document.getElementById("chart");
+
     this.graph = new Rickshaw.Graph( {
             element: document.querySelector("#chart"),
-            width: 1000,
-            height: 500,
+            width: chart.clientWidth,
+            height: chart.clientHeight,
             renderer: 'line',
             series: [ {
                 name: 'acc',
