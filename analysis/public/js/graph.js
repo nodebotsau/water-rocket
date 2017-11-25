@@ -18,7 +18,7 @@ function Grapher() {
     let palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
 
     let scale_acc = d3.scale.linear().domain([-2, 5]);
-    let scale_alt = d3.scale.linear().domain([30, 45]);
+    let scale_alt = d3.scale.linear().domain([-5, 120]);
     //let scale_gyr = d3.scale.linear().domain([0, 2000]);
 
     this.graph = new Rickshaw.Graph( {
@@ -52,8 +52,8 @@ function Grapher() {
     let x_axis = new Rickshaw.Graph.Axis.Time({
         graph: this.graph,
         ticksTreatment: 'glow',
-        timeUnit: units,
-        //timeFixture: new Rickshaw.Fixtures.Time.Local(),
+        //timeUnit: units,
+        timeFixture: new Rickshaw.Fixtures.Time.Local(),
         //tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
     });
 
@@ -160,4 +160,12 @@ Grapher.prototype.add_data = function(data){
 
         this.slider_init = true;
     }
+};
+
+Grapher.prototype.reset = function() {
+    this.series_data.forEach((series) => {
+        series.length = 0;
+    });
+    console.log(this.series_data);
+    this.graph.update();
 };

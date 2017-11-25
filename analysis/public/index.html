@@ -6,12 +6,16 @@
         <script src="/vendor/rickshaw/rickshaw.min.js"></script>
         <script src="/js/jquery.min.js"></script>
         <script src="/js/jquery-ui.min.js"></script>
+        <script src="/js/reactor.js"></script>
         <script src="/js/graph.js"></script>
+        <script src="/js/ui.js"></script>
 
         <link rel="stylesheet" href="/vendor/rickshaw/rickshaw.min.css" />
         <link rel="stylesheet" href="/css/jquery-ui.min.css" />
 
 		<style>
+            body {
+            }
 			#chart_container {
 				position: relative;
 				font-family: Arial, Helvetica, sans-serif;
@@ -51,7 +55,19 @@
             }
             #config {
                 margin-top: 2rem;
+                font-size: 2rem;
             }
+            .server div, .server button {
+                display: inline-block;
+            }
+            .server div {
+                width: 20rem;
+            }
+            .server div input {
+                width: 100%;
+            }
+
+
 		</style>
     </head>
     <body>
@@ -66,30 +82,52 @@
         <div id="slider"></div>
 
         <div id="config">
-            <div><input type="text" placeholder="MQTT Server eg iot.eclipse.org"/></div>
-            <div><input type="text" placeholder="myid/rocket_surgery"></div>
-            <button id="start">Start</button>
-            <button id="pause">Pause / Stop</button>
+            <div class="server">
+                <div><input id="hostname" type="text" placeholder="MQTT Server eg iot.eclipse.org"/></div>
+                <div><input id="topic" type="text" placeholder="myid/rocket_surgery"></div>
+                <button id="connect">Connect</button>
+                <button id="state">Waiting</button>
+                <button id="reset">Reset</button>
+            </div>
             <button id="download">Download data</button>
         </div>
 
         <script>
+            let reactor = new Reactor();
+            reactor.registerEvent('connect');
+            reactor.registerEvent('disconnect');
+            reactor.registerEvent('data_reset');
 
             let grapher = new Grapher();
+            let ui = new UI({ reactor: reactor });
+            let client = null;
 
-            let client = mqtt.connect("ws://iot.eclipse.org/ws");
-            client.subscribe("rocket_surgery/data");
+            reactor.addEventListener('connect', (e) => {
+                client = mqtt.connect("ws://" + ui.mqtt.host);
+                client.subscribe(ui.mqtt.topic);
 
-            client.on("connected", () => {
-                console.log("Connected");
+                // set up the handlers for the mqtt client.
+                client.on("connect", () => {
+                    ui.set_state('running');
+                });
+
+                client.on("message", (topic, payload) => {
+                    let data = JSON.parse(payload.toString());
+                    if (ui.state == ui.STATES.RUNNING) {
+                        grapher.add_data(data);
+                    }
+                });
             });
 
-            client.on("message", (topic, payload) => {
-                let data = JSON.parse(payload.toString());
-                //console.log(topic, payload.toString());
+            reactor.addEventListener('disconnect', () => {
+                client.end(null, () => {
+                    ui.set_state('waiting');
+                });
+            });
 
-                grapher.add_data(data);
-
+            reactor.addEventListener('data_reset', () => {
+                console.log('resetting');
+                grapher.reset();
             });
 
         </script>
