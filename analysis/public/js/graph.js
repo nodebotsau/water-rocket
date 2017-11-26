@@ -148,11 +148,20 @@ Grapher.prototype.add_data = function(data){
 };
 
 Grapher.prototype.reset = function() {
-    this.series_data.forEach((series) => {
-        series.length = 0;
-    });
+
+    let loaded_data = this.slider_init;
+
     this.remove_slider();
-    this.graph.update();
+    while (this.series_data[ALT].length > 0) {
+        this.series_data[ALT].shift();
+    }
+    while (this.series_data[ACC].length > 0) {
+        this.series_data[ACC].shift();
+    }
+
+    if (! loaded_data) {
+        this.graph.update();
+    }
 };
 
 Grapher.prototype.load = function (data) {
@@ -167,8 +176,8 @@ Grapher.prototype.load = function (data) {
         this.series_data[ACC].push(item);
     });
 
-    this.add_slider();
     this.graph.update();
+    this.add_slider();
 };
 
 Grapher.prototype.add_slider = function() {
