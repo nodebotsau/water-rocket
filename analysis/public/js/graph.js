@@ -48,6 +48,8 @@ function Grapher() {
             }],
     } );
 
+    this.slider = null;
+
     let time = new Rickshaw.Fixtures.Time();
     let units = time.unit('second');
 
@@ -143,35 +145,18 @@ Grapher.prototype.add_data = function(data){
     }
 
     this.graph.update();
-
-    // now add a slider
-    if (this.series_data[ALT].length > 10 && ! this.slider_init) {
-
-        /**let slider = new Rickshaw.Graph.RangeSlider({
-            graph: graph,
-            element: document.querySelector('#slider')
-        });**/
-
-        /**var sliderXAxis = new Rickshaw.Graph.Axis.Time({
-            graph: graph,
-            timeFixture: new Rickshaw.Fixtures.Time.Local(),
-            ticksTreatment: 'glow',
-        });
-
-        sliderXAxis.render();**/
-
-        this.slider_init = true;
-    }
 };
 
 Grapher.prototype.reset = function() {
     this.series_data.forEach((series) => {
         series.length = 0;
     });
+    this.remove_slider();
     this.graph.update();
 };
 
 Grapher.prototype.load = function (data) {
+    // load new data up into the graph.
     const loaded_data = JSON.parse(data);
 
     loaded_data[ALT].forEach((item) => {
@@ -182,6 +167,37 @@ Grapher.prototype.load = function (data) {
         this.series_data[ACC].push(item);
     });
 
+    this.add_slider();
     this.graph.update();
-//    this.graph.render();
+};
+
+Grapher.prototype.add_slider = function() {
+    // adds a slider to the viz.
+
+    if (! this.slider_init) {
+
+        this.slider = new Rickshaw.Graph.RangeSlider({
+            graph: this.graph,
+            element: document.querySelector('#slider')
+        });
+
+        this.slider_init = true;
+    }
+};
+
+Grapher.prototype.remove_slider = function() {
+    // adds a slider to the viz.
+
+    if (this.slider_init) {
+
+        this.slider = null;
+        let element = document.querySelector("#slider");
+        let new_slider = document.createElement("div");
+        new_slider.setAttribute("id", "slider");
+
+        let p = element.parentNode;
+        p.replaceChild(new_slider, element);
+
+        this.slider_init = false;
+    }
 };

@@ -75,9 +75,11 @@
             let reactor = new Reactor();
             reactor.registerEvent('connect');
             reactor.registerEvent('disconnect');
-            reactor.registerEvent('data_reset');
-            reactor.registerEvent('data_save');
             reactor.registerEvent('data_load');
+            reactor.registerEvent('data_paused');
+            reactor.registerEvent('data_reset');
+            reactor.registerEvent('data_running');
+            reactor.registerEvent('data_save');
             reactor.registerEvent('los');
             reactor.registerEvent('sig');
 
@@ -134,6 +136,11 @@
             reactor.addEventListener('data_load', (data) => {
                 grapher.load(data);
                 ui.load_complete();
+            });
+
+            reactor.addEventListener('data_paused', () => {
+            });
+            reactor.addEventListener('data_running', () => {
             });
 
             reactor.addEventListener('los', () => {

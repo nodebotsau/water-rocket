@@ -71,6 +71,16 @@ aside {
     opacity: 0.9;
 }
 
+
+#slider {
+    height: 1rem;
+    margin: 0 1rem;
+}
+
+#slider span.ui-slider-handle {
+    height: 1.2rem;
+}
+
 #config {
 }
 

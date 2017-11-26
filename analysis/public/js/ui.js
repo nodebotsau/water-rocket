@@ -115,13 +115,13 @@ UI.prototype.set_state = function(state) {
         this.c.state.textContent = "Pause";
         this.c.config.classList.remove("paused", "waiting");
         this.c.config.classList.add("running");
-        //this.reactor.dispatchEvent('data_running');
+        this.reactor.dispatchEvent('data_running');
     } else if (state == "pause") {
         this.state = STATES.PAUSED;
         this.c.state.textContent = "Resume";
         this.c.config.classList.remove("running", "waiting");
         this.c.config.classList.add("paused");
-        //this.reactor.dispatchEvent('data_paused');
+        this.reactor.dispatchEvent('data_paused');
     } else if (state == "waiting") {
         this.state = STATES.WAITING;
         this.c.state.textContent = "Waiting";
