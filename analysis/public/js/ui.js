@@ -24,6 +24,8 @@ function UI(options) {
         reset: document.getElementById("reset"),
         config: document.getElementById("config"),
         telemetry: document.getElementById("telemetry"),
+        load: document.getElementById('load'),
+        loader: document.getElementById('files'),
     };
 
     this.STATES = STATES;
@@ -74,6 +76,36 @@ UI.prototype.event_init = function() {
         this.set_state('pause');
         this.reactor.dispatchEvent("data_reset");
     });
+
+    this.c.download.addEventListener("click", (e) => {
+        // create a data object
+        this.set_state('pause');
+        this.reactor.dispatchEvent('data_save');
+    });
+
+    this.c.loader.addEventListener('change', (e) => {
+
+        this.set_state('pause');
+        this.reactor.dispatchEvent("data_reset");
+
+        let files = e.target.files;
+
+        // should only be one
+        let f = files[0];
+        let reader = new FileReader();
+
+        reader.onload = (e, result) => {
+            this.reactor.dispatchEvent('data_load', e.target.result);
+        };
+
+        reader.readAsText(f);
+
+    }, false);
+
+    this.c.load.addEventListener('click', (e) => {
+        let loader_elem = document.querySelector('.loader');
+        loader_elem.classList.add("visible");
+    });
 };
 
 UI.prototype.set_state = function(state) {
@@ -116,4 +148,10 @@ UI.prototype.set_signal = function(state) {
     } else {
         this.c.telemetry.classList.add("disconnected");
     }
-}
+};
+
+UI.prototype.load_complete = function() {
+    // used to just switch off the load component;
+    let loader_elem = document.querySelector('.loader');
+    loader_elem.classList.remove('visible');
+};

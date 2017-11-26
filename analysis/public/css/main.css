@@ -114,7 +114,7 @@ aside li input {
 div.actions {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: center;
     margin-bottom: 1rem;
 }
 
@@ -122,10 +122,11 @@ div.actions {
     width: 30%;
     height: 2rem;
     font-size: 1.2rem;
+    margin: 0 0.5rem;
 }
 
-.actions button#download {
-    width: calc(60% + 1rem);
+.actions button#download, .actions button#load {
+    width: 60%;
 }
 
 button#reset {
@@ -136,6 +137,13 @@ div#config.paused button#reset {
     display: initial;
 }
 
+aside div.loader {
+    display: none;
+}
+
+aside div.loader.visible {
+    display: initial;
+}
 
 /** Media query specific overrides **/
 

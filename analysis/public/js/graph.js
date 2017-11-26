@@ -168,6 +168,20 @@ Grapher.prototype.reset = function() {
     this.series_data.forEach((series) => {
         series.length = 0;
     });
-    console.log(this.series_data);
     this.graph.update();
+};
+
+Grapher.prototype.load = function (data) {
+    const loaded_data = JSON.parse(data);
+
+    loaded_data[ALT].forEach((item) => {
+        this.series_data[ALT].push(item);
+    });
+
+    loaded_data[ACC].forEach((item) => {
+        this.series_data[ACC].push(item);
+    });
+
+    this.graph.update();
+//    this.graph.render();
 };

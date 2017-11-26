@@ -47,6 +47,13 @@
                         <div class="actions">
                             <button id="download">Download data</button>
                         </div>
+                        <div class="actions">
+                            <button id="load">Load data</button>
+                        </div>
+                        <div class="loader">
+                            <p>Select a previously saved file to load it for analysis</p>
+                            <input type="file" id="files" name="files[]" />
+                        </div>
                     </div>
                 </div>
                 <!--
@@ -69,6 +76,8 @@
             reactor.registerEvent('connect');
             reactor.registerEvent('disconnect');
             reactor.registerEvent('data_reset');
+            reactor.registerEvent('data_save');
+            reactor.registerEvent('data_load');
             reactor.registerEvent('los');
             reactor.registerEvent('sig');
 
@@ -76,6 +85,8 @@
             let ui = new UI({ reactor: reactor });
             let client = null;
             let last_message = 0;
+
+            window.grapher = grapher;
 
             reactor.addEventListener('connect', (e) => {
                 client = mqtt.connect("ws://" + ui.mqtt.host);
@@ -107,6 +118,24 @@
                 grapher.reset();
             });
 
+            reactor.addEventListener('data_save', () => {
+                //console.log(JSON.stringify(grapher.series_data));
+                const series = JSON.stringify(grapher.series_data);
+                const filename = 'telemetrydata.json';
+                const data_string = 'data:text/json;charset=utf-8,' + series;
+                const data = encodeURI(data_string);
+
+                let link = document.createElement('a');
+                link.setAttribute('href', data);
+                link.setAttribute('download', filename);
+                link.click();
+            });
+
+            reactor.addEventListener('data_load', (data) => {
+                grapher.load(data);
+                ui.load_complete();
+            });
+
             reactor.addEventListener('los', () => {
                 ui.set_signal(false);
             });
@@ -118,7 +147,6 @@
             window.setInterval(() => {
                 const curr_time = Date.now();
 
-                console.log("LOS check", last_message, curr_time);
                 if (last_message > 0) {
                     if (curr_time - last_message > LOS_TIMEOUT) {
                         reactor.dispatchEvent("los");
