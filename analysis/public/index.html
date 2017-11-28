@@ -44,10 +44,13 @@
                             <button id="state">Waiting</button>
                             <button id="reset">Reset</button>
                         </div>
-                        <div class="actions">
+                        <!--<div class="actions wide">
+                            <button id="calibrate">Set zero alt</button>
+                        </div>-->
+                        <div class="actions wide">
                             <button id="download">Download data</button>
                         </div>
-                        <div class="actions">
+                        <div class="actions wide">
                             <button id="load">Load data</button>
                         </div>
                         <div class="loader">
@@ -73,6 +76,7 @@
             const LOS_TIMEOUT = 5000;
 
             let reactor = new Reactor();
+            reactor.registerEvent('calibrate_alt');
             reactor.registerEvent('connect');
             reactor.registerEvent('disconnect');
             reactor.registerEvent('data_load');
@@ -89,6 +93,10 @@
             let last_message = 0;
 
             window.grapher = grapher;
+
+            reactor.addEventListener('calibrate_alt', (e) => {
+                grapher.calibrate();
+            });
 
             reactor.addEventListener('connect', (e) => {
                 client = mqtt.connect("ws://" + ui.mqtt.host);

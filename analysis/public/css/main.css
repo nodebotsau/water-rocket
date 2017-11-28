@@ -135,7 +135,7 @@ div.actions {
     margin: 0 0.5rem;
 }
 
-.actions button#download, .actions button#load {
+.actions.wide button {
     width: 60%;
 }
 

@@ -5,7 +5,10 @@
 const ACC = 0;
 const GYR = 1;
 const ALT = 2;
+const SMO_ALT = 3;
+
 const MAX_PTS = 1500;
+const MV_AVG_PTS = 8;
 
 function Grapher() {
 
@@ -13,13 +16,12 @@ function Grapher() {
     this.base_time_value = 0;
     this.base_time = 0; //new Date.now() / 1000;
 
-    this.series_data = [[], [], [] ];
+    this.series_data = [[], [], [], [] ];
 
     let palette = new Rickshaw.Color.Palette({scheme: 'colorwheel'});
 
-    let scale_acc = d3.scale.linear().domain([-2, 5]);
-    let scale_alt = d3.scale.linear().domain([-5, 120]);
-    //let scale_gyr = d3.scale.linear().domain([0, 2000]);
+    let scale_acc = d3.scale.linear().domain([-5, 9]);
+    let scale_alt = d3.scale.linear().domain([-30, 120]);
 
     let chart = document.getElementById("chart");
 
@@ -34,16 +36,16 @@ function Grapher() {
                 data: this.series_data[ACC],
                 scale: scale_acc,
             },
-            /**{
-                name: 'gyr',
-                color: palette.color(),
-                data: series_data[GYR],
-                scale: scale_gyr,
-            }, **/
             {
                 name: 'alt',
                 color: palette.color(),
                 data: this.series_data[ALT],
+                scale: scale_alt,
+            },
+            {
+                name: 'smoothed_alt',
+                color: palette.color(),
+                data: this.series_data[SMO_ALT],
                 scale: scale_alt,
             }],
     } );
@@ -70,14 +72,6 @@ function Grapher() {
             element: document.getElementById('y_axis_alt'),
             scale: scale_alt,
     });
-
-    /**let y_axis_gyr = new Rickshaw.Graph.Axis.Y.Scaled({
-            graph: graph,
-            orientation: 'right',
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            element: document.getElementById('y_axis_gyr'),
-            scale: scale_gyr,
-    });**/
 
     let y_axis_acc = new Rickshaw.Graph.Axis.Y.Scaled({
             graph: this.graph,
@@ -131,17 +125,34 @@ Grapher.prototype.add_data = function(data){
         this.series_data[ACC].shift();
     }
 
-    /**series_data[GYR].push({
-        y: data.gyr,
-        x: data.t,
-    });**/
-
     this.series_data[ALT].push({
         y: data.alt,
         x: curr_time_s,
     });
     if (this.series_data[ALT].length > MAX_PTS) {
         this.series_data[ALT].shift();
+    }
+
+    // work out smoothed average so get the appropriate indexes
+    let start = 0;
+    const end = this.series_data[ALT].length - 1;
+    if (this.series_data[ALT].length > MV_AVG_PTS) {
+        start = this.series_data[ALT].length - MV_AVG_PTS;
+    }
+
+    let sum = 0;
+    for (let i = start; i <= end; i++) {
+        sum = sum + this.series_data[ALT][i].y;
+    }
+
+    const avg = sum / MV_AVG_PTS;
+
+    this.series_data[SMO_ALT].push({
+        y: avg,
+        x: curr_time_s,
+    });
+    if (this.series_data[SMO_ALT].length > MAX_PTS) {
+        this.series_data[SMO_ALT].shift();
     }
 
     this.graph.update();
@@ -154,6 +165,9 @@ Grapher.prototype.reset = function() {
     this.remove_slider();
     while (this.series_data[ALT].length > 0) {
         this.series_data[ALT].shift();
+    }
+    while (this.series_data[SMO_ALT].length > 0) {
+        this.series_data[SMO_ALT].shift();
     }
     while (this.series_data[ACC].length > 0) {
         this.series_data[ACC].shift();
@@ -175,6 +189,12 @@ Grapher.prototype.load = function (data) {
     loaded_data[ACC].forEach((item) => {
         this.series_data[ACC].push(item);
     });
+
+    if (loaded_data[SMO_ALT]) {
+        loaded_data[SMO_ALT].forEach((item) => {
+            this.series_data[SMO_ALT].push(item);
+        });
+    }
 
     this.graph.update();
     this.add_slider();

@@ -26,6 +26,7 @@ function UI(options) {
         telemetry: document.getElementById("telemetry"),
         load: document.getElementById('load'),
         loader: document.getElementById('files'),
+        calibrate: document.getElementById('calibrate'),
     };
 
     this.STATES = STATES;
@@ -106,6 +107,11 @@ UI.prototype.event_init = function() {
         let loader_elem = document.querySelector('.loader');
         loader_elem.classList.add("visible");
     });
+
+    this.c.load.addEventListener('click', (e) => {
+        this.reactor.dispatchEvent('calibrate_alt');
+    });
+
 };
 
 UI.prototype.set_state = function(state) {
