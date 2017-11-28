@@ -38,7 +38,7 @@ _, _, alt0 = bmp.read()
 t0 = time.ticks_ms()
 
 def read_sensors(_):
-    if gc.mem_free() > 1000:
+    if gc.mem_free() > 4096:
         (acc_x, acc_y, acc_z), _ = mpu.read()
         _, _, alt = bmp.read()
         t = time.ticks_ms()
@@ -52,7 +52,6 @@ while True:
         t, acc_z, alt = queue.pop()
         msg = '{"id":"%s","t":%d,"acc":%f,"alt":%f}' % (name, t, acc_z, alt)
         mqtt.publish(topic, msg)
-        gc.collect()
     except IndexError:
         time.sleep(TIMER_PERIOD*0.0015)
-
+    gc.collect()
