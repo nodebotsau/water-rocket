@@ -3,3 +3,5 @@ WIFI_PASSWORD = "YOUR_WIFI_PASSWORD"
 
 MQTT_HOST     = "iot.eclipse.org"
 MQTT_TOPIC    = "YOUR_NAME/rocket"
+
+TIMER_PERIOD  = 25

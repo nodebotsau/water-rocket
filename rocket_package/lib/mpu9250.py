@@ -27,10 +27,11 @@ class MPU9250:
         else:
             raise ValueError("accel_max_g must be <= 16")
 
+        # XXX TODO something about gyro scaling and calibration
+
         self.bus.writeto_mem(self.addr, 107, bytes([0]))
         self.bus.writeto_mem(self.addr, 28, bytes([accel_fs_sel]))
 
     def read(self):
         (ax, ay, az, _, gx, gy, gz) = struct.unpack(">7h", self.bus.readfrom_mem(104,0x3b,14))
-        #return math.sqrt(ax*ax + ay*ay + az*az) / self.accel_scale, math.sqrt(gx*gx + gy*gy + gz*gz)
-        return az / self.accel_scale, gz
+        return (ax / self.accel_scale, ay / self.accel_scale, az / self.accel_scale), (gx, gy, gz)

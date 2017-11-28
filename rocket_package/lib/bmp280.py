@@ -6,6 +6,10 @@ class BMP280:
     """Support for the Bosch BMP280 atmospheric temperature/pressure sensor"""
 
     def __init__(self, bus, addr=118):
+        """Takes an I2C bus (or similar) and a bus address, resets the sensor,
+        checks its chip ID and configures it with sensible defaults.  Stores 
+        factory trim values for later use."""
+
         self.bus = bus
         self.addr = addr
 
@@ -17,6 +21,8 @@ class BMP280:
         self.trim = struct.unpack("<HhhHhhhhhhhh", self.bus.readfrom_mem(self.addr, 0x88, 24))
 
     def read(self):
+        """Read temperature (in C), pressure (in Pa) and barometric altitude (m).""" 
+
         (up, upx, ut, utx) = struct.unpack(">HBHB", self.bus.readfrom_mem(self.addr, 0xF7, 6))
 
         # 20 bit values for raw temperature and pressure
