@@ -8,15 +8,13 @@ from umqtt.robust import MQTTClient
 import bmp280
 import mpu9250
 import gc
+import wifi
 
 pwr = machine.Pin(22, machine.Pin.OUT)
 pwr(0)
 
-wlan = network.WLAN()
-wlan.active(True)
-wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-while not wlan.isconnected(): 
-    time.sleep(0.5)
+while not wifi.connect(WIFI_SSIDS):
+  time.sleep(0.5)
 
 name = ("%02x" * 6) % struct.unpack("6B", machine.unique_id())
 topic = "%s/%s" % (MQTT_TOPIC, name)
