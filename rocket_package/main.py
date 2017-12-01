@@ -17,7 +17,8 @@ while not wifi.connect(WIFI_SSIDS):
   time.sleep(0.5)
 
 name = ("%02x" * 6) % struct.unpack("6B", machine.unique_id())
-topic = "%s/%s" % (MQTT_TOPIC, name)
+#topic = "%s/%s" % (MQTT_TOPIC, name)
+topic = MQTT_TOPIC
 
 mqtt = MQTTClient(name, MQTT_HOST)
 mqtt.connect()
