@@ -2,8 +2,8 @@
 
 // wire up the elements of the UI to various functions.
 
-const MQTT_DEFAULT_HOST= "iot.eclipse.org/ws";
-const MQTT_DEFAULT_TOPIC = "rocket_surgery/#";
+const MQTT_DEFAULT_HOST= mqtt_details.host;
+const MQTT_DEFAULT_TOPIC = mqtt_details.topic;
 
 const STATES = {
     WAITING: 0,
@@ -42,7 +42,14 @@ function UI(options) {
 
     this.reactor = opts.reactor;
 
+    this.init();
     this.event_init();
+}
+
+UI.prototype.init = function() {
+    // does general initialistions of the UI
+    this.c.host.placeholder = "MQTT Host (default: " + MQTT_DEFAULT_HOST + ")";
+    this.c.topic.placeholder = "Topic (default: " + MQTT_DEFAULT_TOPIC + ")";
 }
 
 UI.prototype.event_init = function() {
